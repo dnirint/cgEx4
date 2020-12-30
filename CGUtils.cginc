@@ -20,8 +20,12 @@ struct bumpMapData
 // Returns UV coordinates corresponding to pos using spherical texture mapping
 float2 getSphericalUV(float3 pos)
 {
-    // Your implementation
-    return 0;
+    float r = sqrt((pos.x * pos.x) + (pos.y * pos.y) + (pos.z * pos.z));
+    float theta = atan2(pos.z, pos.x);
+    float phi = acos(pos.y / r);
+    float u = 0.5 + (theta / (2*PI));
+    float v = (1-phi) / PI;
+    return float2 (u, v);
 }
 
 // Implements an adjusted version of the Blinn-Phong lighting model
