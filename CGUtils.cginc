@@ -24,7 +24,7 @@ float2 getSphericalUV(float3 pos)
     float theta = atan2(pos.z, pos.x);
     float phi = acos(pos.y / r);
     float u = 0.5 + (theta / (2*PI));
-    float v = (1-phi) / PI;
+    float v = 1 - phi / PI;
     return float2 (u, v);
 }
 
