@@ -72,6 +72,7 @@ float biquinticInterpolation(float2 v[4], float2 t)
 float triquinticInterpolation(float3 v[8], float3 t)
 {
     // Your implementation
+    
     return 0;
 }
 
