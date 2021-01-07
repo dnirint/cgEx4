@@ -72,7 +72,12 @@ float biquinticInterpolation(float2 v[4], float2 t)
 float triquinticInterpolation(float3 v[8], float3 t)
 {
     // Your implementation
-    
+    float2 a[4] = {v[0].xy, v[1].xy, v[2].xy, v[3].xy};
+    float side_a = biquinticInterpolation(a, t.xy);
+    float2 b[4] = {v[4].xy, v[5].xy, v[6].xy, v[7].xy};
+    float side_b = biquinticInterpolation(b, t.xy);
+    return lerp(side_a, side_b, t.z);
+
     return 0;
 }
 
@@ -125,8 +130,54 @@ float perlin2d(float2 c)
 // Returns the value of a 3D Perlin noise function at the given coordinates c
 float perlin3d(float3 c)
 {                    
-    // Your implementation
-    return 0;
+    // x y z
+    float floor_x = floor(c.x);
+    float floor_y = floor(c.y);
+    float floor_z = floor(c.z);
+    float ceil_x = floor(c.x + 1);
+    float ceil_y = floor(c.y + 1);
+    float ceil_z = floor(c.z + 1);
+
+    float3 fff = (float3(floor_x, floor_y, floor_z));
+    float3 ffc = (float3(floor_x, floor_y, ceil_z));
+    float3 fcf = (float3(floor_x, ceil_y, floor_z));
+    float3 fcc = (float3(floor_x, ceil_y, ceil_z));
+    float3 cff = (float3(ceil_x, floor_y, floor_z));
+    float3 cfc = (float3(ceil_x, floor_y, ceil_z));
+    float3 ccf = (float3(ceil_x, ceil_y, floor_z));
+    float3 ccc = (float3(ceil_x, ceil_y, ceil_z));
+
+    float3 fff_grad = random3(fff);
+    float3 ffc_grad = random3(ffc);
+    float3 fcf_grad = random3(fcf);
+    float3 fcc_grad = random3(fcc);
+    float3 cff_grad = random3(cff);
+    float3 cfc_grad = random3(cfc);
+    float3 ccf_grad = random3(ccf);
+    float3 ccc_grad = random3(ccc);
+
+    float3 fff_dist = fff - c;
+    float3 ffc_dist = ffc - c;
+    float3 fcf_dist = fcf - c;
+    float3 fcc_dist = fcc - c;
+    float3 cff_dist = cff - c;
+    float3 cfc_dist = cfc - c;
+    float3 ccf_dist = ccf - c;
+    float3 ccc_dist = ccc - c;
+
+    float3 inf_val0 = dot(fff_grad, fff_dist);
+    float3 inf_val1 = dot(ffc_grad, ffc_dist);
+    float3 inf_val2 = dot(fcf_grad, fcf_dist);
+    float3 inf_val3 = dot(fcc_grad, fcc_dist);
+    float3 inf_val4 = dot(cff_grad, cff_dist);
+    float3 inf_val5 = dot(cfc_grad, cfc_dist);
+    float3 inf_val6 = dot(ccf_grad, ccf_dist);
+    float3 inf_val7 = dot(ccc_grad, ccc_dist);
+
+    float3 influence_values[8] = {inf_val0, inf_val1, inf_val2, inf_val3, inf_val4, inf_val5, inf_val6, inf_val7 };
+
+    return triquinticInterpolation(influence_values, frac(c));
+
 }
 
 

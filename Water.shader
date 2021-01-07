@@ -50,6 +50,10 @@ Shader "CG/Water"
                 // Returns the value of a noise function simulating water, at coordinates uv and time t
                 float waterNoise(float2 uv, float t)
                 {
+                    float p1 = perlin3d(float3(0.5*uv[0], 0.5*uv[1], 0.5*t));
+                    float p2 = 0.5 * perlin3d(float3(uv[0], uv[1], t));
+                    float p3 = 0.2 * perlin3d(float3(2*uv[0], 2*uv[1], 3*t));
+                    return p1+p2+p3;
                     return perlin2d(uv);
                 }
 
@@ -58,7 +62,7 @@ Shader "CG/Water"
                     float u_derivative = ((tex2D(i.heightMap, float2 (i.uv[0] + i.du, i.uv[1])) - tex2D(i.heightMap, i.uv)) / i.du)[0];
                     float v_derivative = ((tex2D(i.heightMap, float2 (i.uv[0], i.uv[1] + i.dv)) - tex2D(i.heightMap, i.uv)) / i.dv)[0];
                     float3 nh = normalize(float3 (-u_derivative * i.bumpScale, -v_derivative * i.bumpScale, 1));
-                    return normalize((i.tangent * nh.x + b * nh.y + i.normal * nh.z));                    */                    float3 b = i.tangent * i.normal;                    float u_deriv = waterNoise(_NoiseScale*float2 (i.uv[0] + i.du, i.uv[1]), t) - waterNoise(_NoiseScale*i.uv, t);                    float u_derivative = ((u_deriv) / i.du);                    float v_deriv = waterNoise(_NoiseScale*float2 (i.uv[0], i.uv[1] + i.dv), t) - waterNoise(_NoiseScale*i.uv, t);                    float v_derivative = ((v_deriv) / i.dv);                    float3 nh = normalize(float3 (-u_derivative * i.bumpScale, -v_derivative * i.bumpScale, 1));                    return normalize((i.tangent * nh.x + b * nh.y + i.normal * nh.z));                }
+                    return normalize((i.tangent * nh.x + b * nh.y + i.normal * nh.z));                    */                    float3 b = i.tangent * i.normal;                    i.uv = i.uv * _NoiseScale;                    float u_deriv = waterNoise(float2 (i.uv[0] + i.du, i.uv[1]), t) - waterNoise(i.uv, t);                    float u_derivative = ((u_deriv) / i.du);                    float v_deriv = waterNoise(float2 (i.uv[0], i.uv[1] + i.dv), t) - waterNoise(i.uv, t);                    float v_derivative = ((v_deriv) / i.dv);                    float3 nh = normalize(float3 (-u_derivative * i.bumpScale, -v_derivative * i.bumpScale, 1));                    return normalize((i.tangent * nh.x + b * nh.y + i.normal * nh.z));                }
 
 
 
