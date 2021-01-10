@@ -70,7 +70,7 @@ Shader "CG/Bricks"
 
                     bumpMapData bmd;
                     bmd.normal = n;
-                    bmd.tangent = input.tangent;
+                    bmd.tangent = normalize(input.tangent);
                     bmd.uv = input.uv;
                     bmd.heightMap = _HeightMap;
                     bmd.du = _HeightMap_TexelSize[0];

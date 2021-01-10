@@ -54,29 +54,22 @@ Shader "CG/Water"
                     float p2 = 0.5 * perlin3d(float3(uv[0], uv[1], t));
                     float p3 = 0.2 * perlin3d(float3(2*uv[0], 2*uv[1], 3*t));
                     return p1+p2+p3;
-                    return perlin2d(uv);
+                    
                 }
 
                 // Returns the world-space bump-mapped normal for the given bumpMapData and time t
-                float3 getWaterBumpMappedNormal(bumpMapData i, float t)                {                    /*                    float3 b = i.tangent * i.normal;
-                    float u_derivative = ((tex2D(i.heightMap, float2 (i.uv[0] + i.du, i.uv[1])) - tex2D(i.heightMap, i.uv)) / i.du)[0];
-                    float v_derivative = ((tex2D(i.heightMap, float2 (i.uv[0], i.uv[1] + i.dv)) - tex2D(i.heightMap, i.uv)) / i.dv)[0];
-                    float3 nh = normalize(float3 (-u_derivative * i.bumpScale, -v_derivative * i.bumpScale, 1));
-                    return normalize((i.tangent * nh.x + b * nh.y + i.normal * nh.z));                    */                    float3 b = i.tangent * i.normal;                    i.uv = i.uv * _NoiseScale;                    float u_deriv = waterNoise(float2 (i.uv[0] + i.du, i.uv[1]), t) - waterNoise(i.uv, t);                    float u_derivative = ((u_deriv) / i.du);                    float v_deriv = waterNoise(float2 (i.uv[0], i.uv[1] + i.dv), t) - waterNoise(i.uv, t);                    float v_derivative = ((v_deriv) / i.dv);                    float3 nh = normalize(float3 (-u_derivative * i.bumpScale, -v_derivative * i.bumpScale, 1));                    return normalize((i.tangent * nh.x + b * nh.y + i.normal * nh.z));                }
+                float3 getWaterBumpMappedNormal(bumpMapData i, float t)                {                    float3 b = i.tangent * i.normal;                    i.uv = i.uv * _NoiseScale;                    float u_deriv = waterNoise(float2 (i.uv[0] + i.du, i.uv[1]), t) - waterNoise(i.uv, t);                    float u_derivative = ((u_deriv) / i.du);                    float v_deriv = waterNoise(float2 (i.uv[0], i.uv[1] + i.dv), t) - waterNoise(i.uv, t);                    float v_derivative = ((v_deriv) / i.dv);                    float3 nh = normalize(float3 (-u_derivative * i.bumpScale, -v_derivative * i.bumpScale, 1));                    return normalize((i.tangent * nh.x + b * nh.y + i.normal * nh.z));                }
 
 
 
                 v2f vert (appdata input)
                 {
                     v2f output;
-
-                    float water_noise = waterNoise(input.uv * _NoiseScale , 0);
-                    float z_displacement = water_noise * _BumpScale;
-                    //output.tangent = mul(unity_ObjectToWorld,input.tangent);
+                                        float water_noise = waterNoise(input.uv * _NoiseScale , _Time.y*_TimeScale);
+                    float4 y_displacement = float4(0, water_noise * _BumpScale, 0, 0);
                     output.tangent = input.tangent;
-                    output.pos = UnityObjectToClipPos(input.vertex + float4(0, z_displacement, 0, 0));
+                    output.pos = UnityObjectToClipPos(input.vertex + y_displacement);
                     output.uv = input.uv;
-                    output.normal = input.normal;
                     output.normal = mul(unity_ObjectToWorld, input.normal);
                     output.worldVertex = mul(unity_ObjectToWorld,input.vertex);
 
@@ -86,35 +79,15 @@ Shader "CG/Water"
                 fixed4 frag (v2f input) : SV_Target
                 {
                     float3 n = normalize(input.normal);
-                    
 
                     float3 v = normalize(_WorldSpaceCameraPos - input.worldVertex);
-
-                    //n = normalize(mul(unity_ObjectToWorld, n));
-                    bumpMapData bmd;                    bmd.normal = n;                    bmd.tangent = input.tangent;                    bmd.uv = input.uv;                    bmd.du = DELTA;                    bmd.dv = DELTA;                    bmd.bumpScale = _BumpScale;                    n = getWaterBumpMappedNormal(bmd, 0);
-
+                    bumpMapData bmd;                    bmd.normal = n;                    bmd.tangent = normalize(input.tangent);                    bmd.uv = input.uv;                    bmd.du = DELTA;                    bmd.dv = DELTA;                    bmd.bumpScale = _BumpScale;                    n = getWaterBumpMappedNormal(bmd, _Time.y*_TimeScale);
 
                     float3 r = r = (2 * dot(v, n) * n) - v;
                     float3 ReflectedColor = texCUBE(_CubeMap, r);
-                    
-                    
-                    
                     float3 color = (1 - max(dot(n, v), 0) + 0.2) * ReflectedColor;
                     return fixed4(color, 1);
-                    //return fixed4(n, 1);
-
-                    
-
-
-
-               //     float water_noise = waterNoise(input.uv * _NoiseScale , 0);
-               //     float3 gs = (water_noise * 0.5 + 0.5);
-              //      color = color + gs;
-
-               //     return fixed4(color, 1);
                 }
-
-
 
             ENDCG
         }

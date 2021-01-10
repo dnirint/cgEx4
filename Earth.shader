@@ -67,14 +67,14 @@
 
                     bumpMapData bmd;
                     bmd.normal = n;
-                    bmd.tangent = n * float3(0,1,0);
+                    bmd.tangent = normalize(n * float3(0,1,0));
                     bmd.uv = uv;
                     bmd.heightMap = _HeightMap;
                     bmd.du = _HeightMap_TexelSize[0];
                     bmd.dv = _HeightMap_TexelSize[1];
                     bmd.bumpScale = _BumpScale / 10000.0;
 
-                    float3 bumpMappedNormal = getBumpMappedNormal(bmd);
+                    float3 bumpMappedNormal = normalize(getBumpMappedNormal(bmd));
                     float3 finalNormal = normalize( (1-specularity)*bumpMappedNormal + specularity * n ) ;
                     fixed3 bf = blinnPhong(finalNormal, v, l, _Shininess, albedo, specularity, _Ambient);
 
